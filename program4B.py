@@ -24,11 +24,7 @@ def program4B(n: int, k: int, values: List[int]) -> Tuple[int, List[int]]:
         include_value = values[i - 1]
         if i - k - 1 > 0:
             include_value += OPT[i - k - 1]
-        last_value = OPT[i - 1]
-        if include_value > last_value:
-            OPT[i] = include_value
-        else:
-            OPT[i] = last_value
+        OPT[i] = max(OPT[i - 1], include_value)
 
     # backtrack to find which vaults were chosen
     i = n
