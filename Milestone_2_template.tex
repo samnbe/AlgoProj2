@@ -1,0 +1,211 @@
+\documentclass{article}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{pgfplots}
+\usepackage{hyperref}
+
+\pgfplotsset{compat=1.14}
+\begin{document}
+
+\title{COP4533 - Programming Assignment Milestone-2 Report}
+\date{}
+\maketitle
+{\color{red}
+This document provides a template for writing the report for \textsc{Milestone-2}.  
+Its purpose is to give you a clear base structure for your write-up, along with tips and suggestions on what to include in each section.  
+To illustrate the expected level of detail, the template uses the \textit{Knapsack} problem as an example. 
+}
+
+\section{Team Members}
+{\color{red} If you are working as a team, list the names of all team members and briefly describe each member's contribution.}
+
+\section{Algorithm Design and Analysis}
+
+\subsection{Algorithm 3}
+
+\subsubsection{Description}
+{\color{red} Describe your naive exponential-time algorithm for ProblemG.. Explain how it works step by step. Include pseudocode if appropriate.\\
+
+The purpose of the algorithm description is to communicate your approach as effectively as possible. A long narrative describing each line of your code is not ideal. Instead, aim for a concise, high-level summary of your algorithm, avoiding unnecessary implementation details. Including pseudocode can help clarify your approach, but keep it brief. It’s best to include only language-independent, relevant details. For example, $make\_tuple$ is specific to C++ and unnecessary for algorithm explanation. Strive for readability; good pseudocode balances clarity and conciseness while covering essential details. Try comparing with pseudo codes you come across in books. Here’s a helpful resource on writing effective pseudocode: 
+ \url{https://www.cs.cornell.edu/courses/cs482/2003su/handouts/pseudocode.pdf}
+}
+\subsubsection{Correctness Proof}
+{\color{red} Provide a clear argument or formal proof that your algorithm always gives the correct solution for ProblemG.}
+
+\subsubsection{Runtime Analysis}
+{\color{red} Analyze the time complexity of Algorithm 3. Make sure to include sufficient
+justification.}
+\subsection{Algorithm 4}
+{\color{red} Describe your dynamic programming algorithm. Make sure to include the recursive formulation. Include pseudocode if appropriate.\\
+
+Example using Knapsack problem:\\  
+}
+
+\noindent The Knapsack problem can be defined recursively based on its optimal substructure.  
+Let $OPT(i,w)$ be optimal value of knapsack problem with items $v_1, \dots, v_i$, subject to weight limit $w$.   
+Each item $v_i$ can either be included or excluded, leading to the following \textbf{recursive formulation:}
+\[
+OPT(i, w) =
+\begin{cases}
+0, & \text{if } i = 0 \\
+OPT(i - 1, w), & \text{if } w_i > w \\
+\max\big(OPT(i - 1, w),\ v_i + OPT(i - 1, w - w_i)\big), & \text{otherwise.}
+\end{cases}
+\]
+This recurrence captures the two choices available for each item and will form the basis of the dynamic programming solution.
+
+\setcounter{algorithm}{3}
+\begin{algorithm}[H]
+\caption{Knapsack$(n, W, w_1, \ldots, w_n, v_1, \ldots, v_n)$}
+\begin{algorithmic}[1]
+\For{$w = 0$ to $W$}
+    \State $M[0, w] \gets 0$
+\EndFor
+\For{$i = 1$ to $n$}
+    \For{$w = 0$ to $W$}
+        \If{$w_i > w$}
+            \State $M[i, w] \gets M[i - 1, w]$
+        \Else
+            \State $M[i, w] \gets \max\{M[i - 1, w],\ v_i + M[i - 1, w - w_i]\}$
+        \EndIf
+    \EndFor
+\EndFor
+\State \Return $M[n, W]$
+\end{algorithmic}
+\end{algorithm}
+
+
+\subsubsection{Correctness Proof}
+
+{\color{red} Provide a clear argument or formal proof that your algorithm always gives the correct solution for ProblemG.\\
+
+Example using Knapsack problem:\\  
+}
+
+\noindent\textbf{Theorem.}  
+The DP formulation correctly computes the optimal solution for Knapsack problem
+
+\noindent\textbf{Proof.}\\
+
+We show that the Knapsack problem satisfies the optimal substructure property,  
+and that the recursive formulation correctly expresses it.
+
+Let $O_n$ be an optimal subset of items for a knapsack of capacity $W$ and $n$ total items.
+
+\textbf{Case 1:} Item $n$ is not included in $O_n$.  
+Then $O_n$ must also be an optimal subset of the first $n-1$ items with the same capacity $W$.  
+If there were a subset $Q$ of the first $n-1$ items with higher total value,  
+then $Q$ would also be a better solution for the full problem, contradicting the optimality of $O_n$.
+
+\textbf{Case 2:} Item $n$ is included in $O_n$.  
+Then the remaining items $O_n - \{n\}$ form an optimal subset of the first $n-1$ items  
+with capacity $W - w_n$.  
+If $O_n - \{n\}$ were not optimal for that subproblem,  
+there would exist another subset $Q$ with higher total value and total weight not exceeding $W - w_n$.  
+Adding item $n$ to $Q$ would give a feasible solution for the full problem with higher value than $O_n$,  
+contradicting its optimality.
+
+From these two cases, any optimal solution for $(n, W)$ must come from one of two optimal subproblems:
+\[
+\text{either } (n-1, W) \text{ (excluding item $n$)} \quad \text{or} \quad (n-1, W - w_n) \text{ (including item $n$)}.
+\]
+
+Hence, the Knapsack problem satisfies the optimal substructure property,  
+and the recursive formulation correctly captures this relationship.
+
+
+
+\subsubsection{Runtime Analysis}
+{\color{red} Analyze the time complexity of Algorithm 4. Make sure to include sufficient
+justification.}
+
+\subsection{Algorithm 5}
+
+\subsubsection{Description}
+{\color{red} Describe your optimized dynamic programming algorithm. Make sure to include the recursive formulation. Include pseudocode if appropriate.}
+
+\subsubsection{Correctness Proof}
+{\color{red} Provide a clear argument or formal proof that your algorithm always gives the correct solution for ProblemG.}
+
+\subsubsection{Runtime Analysis}
+{\color{red} Analyze the time complexity of Algorithm 5. Make sure to include sufficient
+justification.}
+
+\section{Experimental Comparative Study}
+
+{\color{red}The goal of the experimental study is to visualize the growth of the running time of the algorithms as the input size increases. Few things that will make the visualization more accurate.
+
+\begin{itemize}
+    \item Generate datasets with size $n$ that goes high enough. Small values of $n$ leads to an inaccurate visualization.
+    \item Pick uniformly distributed values of $n$. Non uniformly distributed values of n leads to a misleading visualization.
+    \item Use enough samples. Not enough samples of n also leads to an inaccurate visualization.
+\end{itemize}
+}
+
+\subsection{Experimental Setup}
+{\color{red} Describe how you generated random datasets, their sizes, and how you measured running times.
+
+You may include additional plots
+
+
+}
+
+\subsection{Plot 3}
+{\color{red} Insert your plot of running time for Program 3 vs.\ input size. Explain the observed trend.}
+
+\begin{filecontents}{p3.dat}
+X   Points   Program3
+1   10000    0.016
+2   15000    0.024
+3   20000    0.030
+4   25000    0.036
+5   30000    0.043
+\end{filecontents}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    xlabel=Number of Elements,
+    ylabel=Running Time (seconds),
+    xticklabels from table={p3.dat}{Points},
+    xtick=data,
+    legend style={at={(0.97,0.03)},anchor=south east}
+]
+\addplot[blue,thick,mark=square*] table [y=Program3,x=X]{p3.dat};
+\addlegendentry{Program 3}
+\end{axis}
+\end{tikzpicture}
+\caption{Example plot.}
+\label{plot1}
+\end{figure}
+
+\subsection{Plot 4}
+{\color{red} Insert your plot of running time for Program 4A vs.\ input size. Explain the observed trend.}
+
+\subsection{Plot 5}
+{\color{red} Insert your plot of running time for Program 4B vs.\ input size. Explain the observed trend.}
+
+\subsection{Plot 6}
+{\color{red} Insert your plot of running time for Program 5 vs.\ input size. Explain the observed trend.}
+
+\subsection{Plot 7}
+{\color{red} Overlay Plots 3,4,5,6 and contrasting the performance of Programs 3,4A, 4B,5}
+
+\subsection{Plot 8}
+{\color{red} Overlay Plots 4,5 and contrasting the performance of Programs 4A, 4B}
+
+\subsection{Plot 9}
+{\color{red} Insert your plot of output quality comparison $(h_g - h_o)/h_o$ of Algorithm1 and any of Algorithms 3,4,5}
+
+\subsection{Observations/Comments}
+{\color{red} Inlcude any additional observations or comments.}
+
+\section{Conclusion}
+{\color{red} Summarize your learning experience in Milestone 1. Reflect on design, analysis, experiments, and challenges.}
+
+\end{document}
