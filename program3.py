@@ -14,11 +14,31 @@ def program3(n: int, k: int, values: List[int]) -> Tuple[int, List[int]]:
     int:  maximal total value
     List[int]: the indices of the chosen vaults(1-indexed)
     """
-    ############################
-    # Add you code here
-    ############################
+    OPT = [-1] * (n + 1)
+    vaults = []
 
-    return 0, [1, 2, 3] # replace with your code
+    def compute_OPT(i: int) -> int:
+        if i <= 0:
+            return 0
+
+        include_value = values[i - 1] + compute_OPT(i - k - 1)
+        exclude_value = compute_OPT(i - 1)
+
+        OPT[i] = max(include_value, exclude_value)
+        return max(include_value, exclude_value)
+    
+    ans = compute_OPT(n)
+    i = n
+    while i > 0:
+        if OPT[i] != OPT[i - 1]:
+            vaults.append(i)
+            i -= k + 1
+        else:
+            i -= 1
+
+
+
+    return ans, vaults[::-1] 
 
 
 if __name__ == '__main__':
