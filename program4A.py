@@ -14,31 +14,9 @@ def program4A(n: int, k: int, values: List[int]) -> Tuple[int, List[int]]:
     int:  maximal total value
     List[int]: the indices of the chosen vaults(1-indexed)
     """
-    OPT = [-1] * (n + 1)
-    vaults = []
+   
 
-    def compute_OPT(i: int) -> int:
-        if i <= 0:
-            return 0
-        if OPT[i] != -1:
-            return OPT[i]
-
-        include_value = values[i - 1] + compute_OPT(i - k - 1)
-        exclude_value = compute_OPT(i - 1)
-
-        OPT[i] = max(include_value, exclude_value)
-        return OPT[i]
-    
-    ans = compute_OPT(n)
-    i = n
-    while i > 0:
-        if OPT[i] != OPT[i - 1]:
-            vaults.append(i)
-            i -= k + 1
-        else:
-            i -= 1
-
-    return ans, vaults[::-1]
+    return 0, []  # Placeholder return statement
 
 
 if __name__ == '__main__':
