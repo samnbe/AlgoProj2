@@ -32,10 +32,6 @@ def program4A(n: int, k: int, values: List[int]) -> Tuple[int, List[int]]:
                 include_value += compute_OPT(j - k - 1)
             OPT[i] = max(exclude_value, include_value)
 
-        # include_value = values[i - 1] + compute_OPT(i - k - 1)
-        # exclude_value = compute_OPT(i - 1)
-
-        # OPT[i] = max(include_value, exclude_value)
         return OPT[i]
     
     ans = compute_OPT(n)
