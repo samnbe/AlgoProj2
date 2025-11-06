@@ -14,70 +14,399 @@
 \title{COP4533 - Programming Assignment Milestone-2 Report}
 \date{}
 \maketitle
-{\color{red}
-This document provides a template for writing the report for \textsc{Milestone-2}.  
-Its purpose is to give you a clear base structure for your write-up, along with tips and suggestions on what to include in each section.  
-To illustrate the expected level of detail, the template uses the \textit{Knapsack} problem as an example. 
-}
 
 \section{Team Members}
-{\color{red} If you are working as a team, list the names of all team members and briefly describe each member's contribution.}
+Samantha Bennett worked on creating and implementing each algorithm and their proofs. Sophia Shah worked on creating each algorithm, the comparative study, and the algorithm analysis.
 
 \section{Algorithm Design and Analysis}
 
 \subsection{Algorithm 3}
-
 \subsubsection{Description}
-{\color{red} Describe your naive exponential-time algorithm for ProblemG.. Explain how it works step by step. Include pseudocode if appropriate.\\
 
-The purpose of the algorithm description is to communicate your approach as effectively as possible. A long narrative describing each line of your code is not ideal. Instead, aim for a concise, high-level summary of your algorithm, avoiding unnecessary implementation details. Including pseudocode can help clarify your approach, but keep it brief. It’s best to include only language-independent, relevant details. For example, $make\_tuple$ is specific to C++ and unnecessary for algorithm explanation. Strive for readability; good pseudocode balances clarity and conciseness while covering essential details. Try comparing with pseudo codes you come across in books. Here’s a helpful resource on writing effective pseudocode: 
- \url{https://www.cs.cornell.edu/courses/cs482/2003su/handouts/pseudocode.pdf}
-}
+We can solve the collecting treasure problem using a recursive approach \textbf{without} memoization.
+
+\textbf{Recursive strategy:} \\
+At every vault index $i$, the algorithm computes the maximum value that can be collected by considering two options:
+\begin{enumerate}
+    \item \textbf{Include} the current vault $i$, and skip the next $k$ vaults by calling the recursive function on index $i - k - 1$.
+    \item \textbf{Exclude} the current vault $i$, and instead call the recursive function on index $i - 1$.
+\end{enumerate}
+The recursive function then returns the maximum of these two values.
+
+\textbf{Step-by-step example:} \\
+Suppose we have the list of treasure vault values and $k = 2$:
+\[
+[1, 2, 3, 4, 5, 6, 7].
+\]
+\begin{enumerate}
+    \item \textbf{Base case:}
+    \[
+    OPT[0] = 0.
+    \]
+    When there are no vaults, the maximum value is $0$.
+
+    \item \textbf{For $i = 1$:}
+    \[
+    OPT[1] = \max(values[1] + OPT[-2],\; OPT[0]) = \max(1 + 0,\; 0) = 1.
+    \]
+    So we take vault $1$.
+
+    \item \textbf{For $i = 2$:}
+    \[
+    OPT[2] = \max(values[2] + OPT[-1],\; OPT[1]) = \max(2 + 0,\; 1) = 2.
+    \]
+    Vault $2$ is better than vault $1$ alone.
+
+    \item \textbf{For $i = 3$:}
+    \[
+    OPT[3] = \max(values[3] + OPT[0],\; OPT[2]) = \max(3 + 0,\; 2) = 3.
+    \]
+    We take vault $3$.
+
+    \item \textbf{For $i = 4$:}
+    \[
+    OPT[4] = \max(values[4] + OPT[1],\; OPT[3]) = \max(4 + 1,\; 3) = 5.
+    \]
+    The best combination up to vault $4$ is vaults $1$ and $4$.
+
+    \item \textbf{For $i = 5$:}
+    \[
+    OPT[5] = \max(values[5] + OPT[2],\; OPT[4]) = \max(5 + 2,\; 5) = 7.
+    \]
+    The optimal set up to vault $5$ is vaults $2$ and $5$.
+
+    \item \textbf{For $i = 6$:}
+    \[
+    OPT[6] = \max(values[6] + OPT[3],\; OPT[5]) = \max(6 + 3,\; 7) = 9.
+    \]
+    The optimal set up to vault $6$ is vaults $3$ and $6$.
+
+    \item \textbf{For $i = 7$:}
+    \[
+    OPT[7] = \max(values[7] + OPT[4],\; OPT[6]) = \max(7 + 5,\; 9) = 12.
+    \]
+    The optimal set up to vault $7$ is vaults $1$, $4$, and $7$.
+
+\end{enumerate}
+
+\textbf{Result:} \\
+The final maximum total value is:
+\[
+OPT[7] = 12.
+\]
+By backtracking through the computed values, the selected vaults are:
+\[
+[1, 4, 7].
+\]
+Hence, the total value collected is $1 + 4 + 7 = 12$.
+
+\vspace{1em}
+
+This algorithm does \textbf{not} use memoization. Therefore, the same subproblems are recomputed many times, leading to an exponential running time.
+
+\begin{algorithm}[H]
+\renewcommand{\thealgorithm}{3}
+\caption{Finding Maximum Total Vault Value (Recursive without Memoization)}\label{alg:recursive}
+\begin{algorithmic}[3]
+\Procedure{MaxVault}{$n, k, v_1, v_2, \ldots, v_n$}
+    \State $OPT \gets [-1]$ repeated $n + 1$ times
+    \State $S \gets \emptyset$ \Comment{set of selected vault indices}
+    \Function{ComputeOPT}{$i$}
+        \If{$i \leq 0$}
+            \State \Return 0
+        \EndIf
+        \State $include \gets v_i +$ \Call{ComputeOPT}{$i - k - 1$}
+        \State $exclude \gets$ \Call{ComputeOPT}{$i - 1$}
+        \State $OPT[i] \gets \max(include, exclude)$
+        \State \Return $OPT[i]$
+    \EndFunction
+    \State $TotalValue \gets$ \Call{ComputeOPT}{$n$}
+    \State $i \gets n$
+    \While{$i > 0$}
+        \If{$OPT[i] \neq OPT[i - 1]$}
+            \State $S \gets S \cup \{i\}$
+            \State $i \gets i - k - 1$
+        \Else
+            \State $i \gets i - 1$
+        \EndIf
+    \EndWhile
+    \State \Return (TotalValue, $S$)
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+
 \subsubsection{Correctness Proof}
 {\color{red} Provide a clear argument or formal proof that your algorithm always gives the correct solution for ProblemG.}
 
 \subsubsection{Runtime Analysis}
-{\color{red} Analyze the time complexity of Algorithm 3. Make sure to include sufficient
-justification.}
-\subsection{Algorithm 4}
-{\color{red} Describe your dynamic programming algorithm. Make sure to include the recursive formulation. Include pseudocode if appropriate.\\
 
-Example using Knapsack problem:\\  
-}
+Let $n$ be the number of vault values in the list.  
+The recursive algorithm evaluates every possible combination of vault selections under the $k$-spacing constraint.  
+At each index $i$, the algorithm makes two recursive calls:
+\begin{enumerate}
+    \item One call that \textbf{includes} the current vault $i$ and then proceeds to index $(i - k - 1)$.
+    \item One call that \textbf{excludes} the current vault $i$ and proceeds to index $(i - 1)$.
+\end{enumerate}
 
-\noindent The Knapsack problem can be defined recursively based on its optimal substructure.  
-Let $OPT(i,w)$ be optimal value of knapsack problem with items $v_1, \dots, v_i$, subject to weight limit $w$.   
-Each item $v_i$ can either be included or excluded, leading to the following \textbf{recursive formulation:}
+This results in a binary branching structure of recursive calls.  
+Let $T(n)$ denote the number of operations required to compute the result for $n$ vaults.  
+The recurrence relation can be expressed as:
+
 \[
-OPT(i, w) =
+T(n) = T(n - 1) + T(n - k - 1) + c,
+\]
+where $c$ is the constant time required for the comparison and addition at each step.
+
+In the worst case, when $k$ is small ($k = 0$ or $k = 1$), the recurrence simplifies to approximately:
+
+\[
+T(n) = T(n - 1) + T(n - 2) + c.
+\]
+
+Therefore, the closed-form growth of $T(n)$ is exponential:
+
+\[
+T(n) = O(2^n).
+\]
+
+Even for larger $k$, the recursive tree still exhibits exponential growth because the number of unique subproblems increases exponentially without memoization.  
+Each call recomputes results for overlapping subproblems many times.
+
+Thus, the overall running time of the recursive vault-selection algorithm \textbf{without memoization} is:
+
+\[
+T(n, k) = O(2^n).
+\]
+
+If memoization or dynamic programming were applied, the number of unique subproblems would be reduced to $n$, resulting in a polynomial runtime.  
+However, in this unoptimized recursive version, every subproblem is recalculated repeatedly, leading to exponential time complexity.
+
+
+\subsection{Algorithm 4}
+\subsubsection{Description}
+
+We can solve the collecting treasure problem using dynamic programming.  
+In this approach, each subproblem corresponds to finding the maximum total vault value obtainable from the first $i$ vaults under the $k$-spacing constraint.  
+
+The recursive relation for the problem is defined as:
+
+\[
+OPT[i] =
 \begin{cases}
-0, & \text{if } i = 0 \\
-OPT(i - 1, w), & \text{if } w_i > w \\
-\max\big(OPT(i - 1, w),\ v_i + OPT(i - 1, w - w_i)\big), & \text{otherwise.}
+0, & \text{if } i = 0, \\[6pt]
+\displaystyle \max_{1 \leq j \leq i} \{ v_j + OPT[j - k - 1] \}, & \text{otherwise.}
 \end{cases}
 \]
-This recurrence captures the two choices available for each item and will form the basis of the dynamic programming solution.
 
-\setcounter{algorithm}{3}
+Intuitively, for each position $i$, we examine every vault $j$ up to $i$ and consider including vault $j$ in the optimal subset.  
+If vault $j$ is chosen, all vaults from $(j - k)$ through $(j - 1)$ must be excluded, and the best total including $v_j$ becomes $v_j + OPT[j - k - 1]$.  
+The maximum of all such choices for $j$ yields $OPT[i]$.
+
+\vspace{1em}
+
+\textbf{Algorithm 4A (Top-Down Recursive DP with Memoization):} \\
+Algorithm 4A implements this recurrence recursively.  
+The function computes $OPT[i]$ using memoization to store previously computed values in the array \texttt{OPT}.  
+Whenever a new subproblem is encountered, it explores all $j$ from $1$ to $i$, updating the maximum total value.  
+Once computed, $OPT[i]$ is stored to avoid redundant recursive calls.  
+After computing $OPT[n]$, the algorithm backtracks to reconstruct the chosen vault indices.
+
 \begin{algorithm}[H]
-\caption{Knapsack$(n, W, w_1, \ldots, w_n, v_1, \ldots, v_n)$}
+\renewcommand{\thealgorithm}{4A}
+\caption{Finding Maximum Total Vault Value (Top-Down Recursive DP with Memoization)}\label{alg:topdown}
 \begin{algorithmic}[1]
-\For{$w = 0$ to $W$}
-    \State $M[0, w] \gets 0$
-\EndFor
-\For{$i = 1$ to $n$}
-    \For{$w = 0$ to $W$}
-        \If{$w_i > w$}
-            \State $M[i, w] \gets M[i - 1, w]$
-        \Else
-            \State $M[i, w] \gets \max\{M[i - 1, w],\ v_i + M[i - 1, w - w_i]\}$
+\Procedure{MaxVault-TopDown}{$n, k, v_1, v_2, \ldots, v_n$}
+    \State $OPT \gets [-1]$ repeated $n + 1$ times
+    \State $S \gets \emptyset$ \Comment{set of selected vault indices}
+    \Function{ComputeOPT}{$i$}
+        \If{$i \leq 0$}
+            \State \Return 0
         \EndIf
-    \EndFor
-\EndFor
-\State \Return $M[n, W]$
+        \If{$OPT[i] \neq -1$}
+            \State \Return $OPT[i]$
+        \EndIf
+        \State $exclude \gets$ \Call{ComputeOPT}{$i - 1$}
+        \State $best \gets exclude$
+        \For{$j = 1$ to $i$}
+            \State $include \gets v_j$
+            \If{$j - k - 1 > 0$}
+                \State $include \gets include +$ \Call{ComputeOPT}{$j - k - 1$}
+            \EndIf
+            \State $best \gets \max(best, include)$
+        \EndFor
+        \State $OPT[i] \gets best$
+        \State \Return $OPT[i]$
+    \EndFunction
+    \State $TotalValue \gets$ \Call{ComputeOPT}{$n$}
+    \State $i \gets n$
+    \While{$i > 0$}
+        \If{$OPT[i] \neq OPT[i - 1]$}
+            \State $S \gets S \cup \{i\}$
+            \State $i \gets i - k - 1$
+        \Else
+            \State $i \gets i - 1$
+        \EndIf
+    \EndWhile
+    \State \Return ($TotalValue$, $S$)
+\EndProcedure
 \end{algorithmic}
 \end{algorithm}
 
+\vspace{1em}
+
+\textbf{Step-by-step example:} \\
+Suppose we have the list of vault values and $k = 2$:
+\[
+[1, 2, 3, 4, 5, 6, 7].
+\]
+
+We use the recurrence relation:
+\[
+OPT[i] =
+\begin{cases}
+0, & \text{if } i = 0, \\[6pt]
+\displaystyle \max_{1 \leq j \leq i} \{ v_j + OPT[j - k - 1] \}, & \text{otherwise.}
+\end{cases}
+\]
+
+\textbf{Step-by-step computation:}
+\[
+k = 2
+\]
+
+\begin{enumerate}
+    \item $OPT[0] = 0$
+    \item $OPT[1] = \max(v_1) = 1$
+    \item $OPT[2] = \max(v_1, v_2) = 2$
+    \item $OPT[3] = \max(v_1, v_2, v_3 + OPT[0]) = \max(1, 2, 3 + 0) = 3$
+    \item $OPT[4] = \max(v_1, v_2, v_3, v_4 + OPT[1]) = \max(1, 2, 3, 4 + 1) = 5$
+    \item $OPT[5] = \max(v_1, v_2, v_3, v_4, v_5 + OPT[2]) = \max(1, 2, 3, 4, 5 + 2) = 7$
+    \item $OPT[6] = \max(v_1, \dots, v_6 + OPT[3]) = \max(1, 2, 3, 4, 5, 6 + 3) = 9$
+    \item $OPT[7] = \max(v_1, \dots, v_7 + OPT[4]) = \max(1, 2, 3, 4, 5, 6, 7 + 5) = 12$
+\end{enumerate}
+
+At the end of the recursive computation:
+\[
+OPT = [0, 1, 2, 3, 5, 7, 9, 12].
+\]
+
+\textbf{Backtracking:}
+\begin{itemize}
+    \item Start at $i = 7$. Since $OPT[7] \neq OPT[6]$, select vault $7$.
+    \item Jump $k + 1 = 3$ steps back $\Rightarrow i = 4$.
+    \item $OPT[4] \neq OPT[3]$, select vault $4$.
+    \item Jump back to $i = 1$.
+    \item $OPT[1] \neq OPT[0]$, select vault $1$.
+\end{itemize}
+
+The selected vaults are:
+\[
+[1, 4, 7],
+\]
+with a total value of:
+\[
+1 + 4 + 7 = 12.
+\]
+
+\bigskip
+\hrule
+\bigskip
+
+\vspace{1em}
+
+\textbf{Algorithm 4B (Bottom-Up Iterative DP):} \\
+Algorithm 4B uses an iterative version of the same recurrence.  
+It builds the \texttt{OPT} table from the base case upward:
+\[
+OPT[0] = 0, \qquad
+OPT[i] = \max_{1 \leq j \leq i} \{ OPT[i - 1],\; v_j + OPT[j - k - 1] \}.
+\]
+Each $OPT[i]$ represents the best possible total up to vault $i$.  
+Once the table is filled, the algorithm backtracks from $i = n$ to reconstruct the chosen vaults.
+
+\begin{algorithm}[H]
+\renewcommand{\thealgorithm}{4B}
+\caption{Finding Maximum Total Vault Value (Bottom-Up Iterative DP)}\label{alg:bottomup}
+\begin{algorithmic}[1]
+\Procedure{MaxVault-BottomUp}{$n, k, v_1, v_2, \ldots, v_n$}
+    \State $OPT[0] \gets 0$
+    \State $S \gets \emptyset$
+    \For{$i = 1$ to $n$}
+        \State $OPT[i] \gets OPT[i - 1]$
+        \For{$j = 1$ to $i$}
+            \State $include \gets v_j$
+            \If{$j - k - 1 > 0$}
+                \State $include \gets include + OPT[j - k - 1]$
+            \EndIf
+            \State $OPT[i] \gets \max(OPT[i], include)$
+        \EndFor
+    \EndFor
+    \State $i \gets n$
+    \While{$i > 0$}
+        \If{$OPT[i] \neq OPT[i - 1]$}
+            \State $S \gets S \cup \{i\}$
+            \State $i \gets i - k - 1$
+        \Else
+            \State $i \gets i - 1$
+        \EndIf
+    \EndWhile
+    \State \Return ($OPT[n]$, $S$)
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\textbf{Step-by-step example:} \\
+Suppose we have the list of vault values and $k = 2$:
+\[
+[1, 2, 3, 4, 5, 6, 7].
+\]
+
+We use the same recurrence relation but fill the $OPT$ table iteratively:
+\[
+OPT[0] = 0, \qquad
+OPT[i] = \max_{1 \leq j \leq i} \{ OPT[i - 1],\; v_j + OPT[j - k - 1] \}.
+\]
+
+\textbf{Step-by-step computation:}
+
+\begin{enumerate}
+    \item $OPT[0] = 0$
+    \item $i = 1$: $include = 1$, so $OPT[1] = 1$
+    \item $i = 2$: $include = 2$, so $OPT[2] = 2$
+    \item $i = 3$: $include = 3 + OPT[0] = 3$, so $OPT[3] = \max(2, 3) = 3$
+    \item $i = 4$: $include = 4 + OPT[1] = 4 + 1 = 5$, so $OPT[4] = \max(3, 5) = 5$
+    \item $i = 5$: $include = 5 + OPT[2] = 5 + 2 = 7$, so $OPT[5] = \max(5, 7) = 7$
+    \item $i = 6$: $include = 6 + OPT[3] = 6 + 3 = 9$, so $OPT[6] = \max(7, 9) = 9$
+    \item $i = 7$: $include = 7 + OPT[4] = 7 + 5 = 12$, so $OPT[7] = \max(9, 12) = 12$
+\end{enumerate}
+
+At the end of the loop:
+\[
+OPT = [0, 1, 2, 3, 5, 7, 9, 12].
+\]
+
+\textbf{Backtracking:}
+\begin{itemize}
+    \item Start at $i = 7$. Since $OPT[7] \neq OPT[6]$, select vault $7$.
+    \item Jump $k + 1 = 3$ steps back $\Rightarrow i = 4$.
+    \item $OPT[4] \neq OPT[3]$, select vault $4$.
+    \item Jump back to $i = 1$.
+    \item $OPT[1] \neq OPT[0]$, select vault $1$.
+\end{itemize}
+
+The selected vaults are:
+\[
+[1, 4, 7],
+\]
+with a total value of:
+\[
+1 + 4 + 7 = 12.
+\]
+
+\bigskip
+\hrule
+\bigskip
 
 \subsubsection{Correctness Proof}
 
@@ -120,20 +449,171 @@ and the recursive formulation correctly captures this relationship.
 
 
 \subsubsection{Runtime Analysis}
-{\color{red} Analyze the time complexity of Algorithm 4. Make sure to include sufficient
-justification.}
+
+Let $n$ be the number of vaults.
+
+\textbf{Algorithm 4A (Top-Down Recursive DP with Memoization):} \\
+Each state $OPT[i]$ is computed at most once because of memoization.  
+For each $i$, the algorithm loops over all possible $j$ from $1$ to $i$ to compute
+\[
+OPT[i] = \max_{1 \leq j \leq i} \{ v_j + OPT[j - k - 1] \}.
+\]
+The inner loop therefore runs in $O(i)$ time for each $i$, and since $i$ ranges from $1$ to $n$, the total time is:
+
+\[
+T(n) = \sum_{i=1}^{n} O(i) = O(n^2).
+\]
+
+Memoization ensures that no subproblem is recomputed, so the total number of function calls is $O(n)$, and the dominant cost arises from the nested loop over $j$.
+
+\vspace{1em}
+
+\textbf{Algorithm 4B (Bottom-Up Iterative DP):} \\
+The bottom-up version explicitly computes all $n$ states iteratively using the same nested structure.  
+For each $i$ from $1$ to $n$, it iterates through all $j$ from $1$ to $i$, resulting in the same cost:
+
+\[
+T(n) = \sum_{i=1}^{n} O(i) = O(n^2).
+\]
+
+Thus, both algorithms have:
+
+\[
+T(n) = \Theta(n^2)
+\]
+
+In practice, Algorithm 4B would perform faster because of sequential memory access and the absence of a recursive overhead while Algorithm 4A provides a more intuitive top-down structure with memoization.
+
 
 \subsection{Algorithm 5}
-
 \subsubsection{Description}
-{\color{red} Describe your optimized dynamic programming algorithm. Make sure to include the recursive formulation. Include pseudocode if appropriate.}
+
+We can solve the collecting treasure problem efficiently using a dynamic programming approach similar to the optimal weighted interval scheduling problem.
+
+The recurrence relation for this algorithm is defined as:
+\[
+OPT[i] =
+\begin{cases}
+0, & \text{if } i = 0, \\[6pt]
+\max \{ OPT[i - 1],\; v_i + OPT[i - k - 1] \}, & \text{otherwise.}
+\end{cases}
+\]
+
+For each vault index $i$, the algorithm compares two possible choices:
+\begin{enumerate}
+    \item \textbf{Exclude} vault $i$: take the optimal value up to the previous vault, $OPT[i - 1]$.
+    \item \textbf{Include} vault $i$: take the vault’s value $v_i$ plus the best value achievable $k$ vaults earlier, $OPT[i - k - 1]$.
+\end{enumerate}
+
+If $i - k - 1 \leq 0$, the algorithm only compares $v_i$ and $OPT[i - 1]$.  
+Each $OPT[i]$ thus stores the maximum achievable total value considering vaults $1$ through $i$.  
+
+Once the table is filled, the algorithm backtracks from the end of the array to reconstruct the indices of the chosen vaults.  
+Whenever the maximum value changes between $OPT[i]$ and $OPT[i - 1]$, vault $i$ is included, and the index jumps $k + 1$ steps backward.
+
+\begin{algorithm}[H]
+\renewcommand{\thealgorithm}{5}
+\caption{Finding Maximum Total Vault Value (Iterative DP)}\label{alg:5}
+\begin{algorithmic}[1]
+\Procedure{MaxVault}{$n, k, v_1, v_2, \ldots, v_n$}
+    \State $OPT[0] \gets 0$
+    \State $S \gets \emptyset$ \Comment{set of selected vault indices}
+    \For{$i = 1$ to $n$}
+        \State $include \gets v_i$
+        \If{$i - k - 1 > 0$}
+            \State $include \gets include + OPT[i - k - 1]$
+        \EndIf
+        \State $OPT[i] \gets \max(OPT[i - 1],\; include)$
+    \EndFor
+    \State $i \gets n$
+    \While{$i > 0$}
+        \If{$OPT[i] \neq OPT[i - 1]$}
+            \State $S \gets S \cup \{i\}$
+            \State $i \gets i - k - 1$
+        \Else
+            \State $i \gets i - 1$
+        \EndIf
+    \EndWhile
+    \State \Return ($OPT[n]$, $S$)
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\textbf{Step-by-step example:} \\
+Suppose we have the list of vault values and $k = 2$:
+\[
+[1, 2, 3, 4, 5, 6, 7].
+\]
+
+We fill the $OPT$ table iteratively using the recurrence relation.
+
+\begin{enumerate}
+    \item $OPT[0] = 0$
+    \item $i = 1$: $include = 1$, so $OPT[1] = \max(0, 1) = 1$
+    \item $i = 2$: $include = 2$, so $OPT[2] = \max(1, 2) = 2$
+    \item $i = 3$: $include = 3 + OPT[0] = 3$, so $OPT[3] = \max(2, 3) = 3$
+    \item $i = 4$: $include = 4 + OPT[1] = 4 + 1 = 5$, so $OPT[4] = \max(3, 5) = 5$
+    \item $i = 5$: $include = 5 + OPT[2] = 5 + 2 = 7$, so $OPT[5] = \max(5, 7) = 7$
+    \item $i = 6$: $include = 6 + OPT[3] = 6 + 3 = 9$, so $OPT[6] = \max(7, 9) = 9$
+    \item $i = 7$: $include = 7 + OPT[4] = 7 + 5 = 12$, so $OPT[7] = \max(9, 12) = 12$
+\end{enumerate}
+
+At the end of the loop:
+\[
+OPT = [0, 1, 2, 3, 5, 7, 9, 12].
+\]
+
+\textbf{Backtracking:}
+\begin{itemize}
+    \item Start at $i = 7$. Since $OPT[7] \neq OPT[6]$, select vault $7$.
+    \item Jump $k + 1 = 3$ steps back to $i = 4$.
+    \item $OPT[4] \neq OPT[3]$, select vault $4$.
+    \item Jump back to $i = 1$.
+    \item $OPT[1] \neq OPT[0]$, select vault $1$.
+\end{itemize}
+
+The selected vaults are:
+\[
+[1, 4, 7],
+\]
+with a total value of $1 + 4 + 7 = 12$.
+
 
 \subsubsection{Correctness Proof}
 {\color{red} Provide a clear argument or formal proof that your algorithm always gives the correct solution for ProblemG.}
 
 \subsubsection{Runtime Analysis}
-{\color{red} Analyze the time complexity of Algorithm 5. Make sure to include sufficient
-justification.}
+
+Let $n$ be the number of vaults.  
+The algorithm fills the $OPT$ array using a single loop that runs from $1$ to $n$:
+\[
+\texttt{for i in range(1, n + 1):}
+\]
+Inside the loop, the algorithm performs a constant number of operations:
+one addition, one comparison, and at most one conditional check.
+
+Thus, the time complexity of filling the $OPT$ table is:
+\[
+T_1(n) = O(n).
+\]
+
+The backtracking loop starts from $i = n$ and decrements $i$ by at least $1$ each iteration until reaching $0$.  
+Therefore, in the worst case, the backtracking requires at most $n$ steps:
+\[
+T_2(n) = O(n).
+\]
+
+Combining both phases:
+\[
+T(n) = T_1(n) + T_2(n) = O(n) + O(n) = O(2n) = O(n).
+\]
+
+Hence, the overall time complexity is:
+\[
+T(n) = \Theta(n).
+\]
+
+Since each iteration takes constant time and both loops run at most $n$ times, this is the most efficient possible solution for this problem.
+
 
 \section{Experimental Comparative Study}
 
