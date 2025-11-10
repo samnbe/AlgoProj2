@@ -140,7 +140,7 @@ This algorithm does \textbf{not} use memoization. Therefore, the same subproblem
 
 \noindent\textbf{Theorem.}  
 
-Let $v[1, \ldots, n]$ be nonnegative vault values and $k \ge 0$ the spacing constraint. Define the recurrence  
+Let $[v_1, \ldots, v_n]$ be nonnegative vault values and $k \ge 0$ the spacing constraint. Define the recurrence  
 \[
 \text{OPT}[i] =
 \begin{cases}
@@ -183,14 +183,14 @@ We define $\text{opt\_total}(i) = 0$ for $i \le 0$, ensuring the recurrence is w
         
         \item[(b)] \textbf{Case 2:} Vault $x+1$ \emph{is selected}.  
         Because of the $k$-spacing constraint, we cannot select any of the previous $k$ vaults, so the feasible set is $\text{opt\_ind}((x+1) - k - 1)$.  
-        Hence, $\text{opt\_total}(x+1) = v[x+1] + \text{opt\_total}((x+1) - k - 1)$.  
+        Hence, $\text{opt\_total}(x+1) = v_{x+1} + \text{opt\_total}((x+1) - k - 1)$.  
         By the induction hypothesis, $\text{opt\_total}((x+1) - k - 1) = \text{OPT}[(x+1) - k - 1]$,  
-        so $\text{opt\_total}(x+1) = v[x+1] + \text{OPT}[(x+1) - k - 1]$.
+        so $\text{opt\_total}(x+1) = v_{x+1} + \text{OPT}[(x+1) - k - 1]$.
     \end{enumerate}
     
-    Therefore, the optimal value at index $x+1$ is obtained by taking the maximum of these two cases:
+    Since these are the only two mutually exclusive and exhaustive possibilities for vault $x+1$, the optimal value at index $x+1$ is obtained by taking the maximum of these two cases:
     \[
-    \text{opt\_total}(x+1) = \max\{\text{OPT}[x],\, v[x+1] + \text{OPT}[(x+1) - k - 1]\} = \text{OPT}[x+1].
+    \text{opt\_total}(x+1) = \max\{\text{OPT}[x],\, v_{x+1} + \text{OPT}[(x+1) - k - 1]\} = \text{OPT}[x+1].
     \]
     This completes the induction.
 \end{enumerate}
@@ -210,7 +210,7 @@ To show that the backtracking reconstruction produces a feasible set (one that s
     \begin{enumerate}
         \item If $\text{OPT}[i] = \text{OPT}[i-1]$, then the exclude-branch yields the optimal total at $i$, meaning that $i$ is not included in any optimal solution. We then set $i \leftarrow i - 1$.
 
-        \item If $\text{OPT}[i] \neq \text{OPT}[i-1]$, then by the recurrence relation we have $\text{OPT}[i] = v[i] + \text{OPT}[i-k-1]$.  
+        \item If $\text{OPT}[i] \neq \text{OPT}[i-1]$, then by the recurrence relation we have $\text{OPT}[i] = v_i + \text{OPT}[i-k-1]$.  
         Thus, some optimal solution includes vault $i$. We record index $i$ and then set $i \leftarrow i - k - 1$.
 
 
@@ -292,7 +292,7 @@ OPT[i] =
 
 Intuitively, for each position $i$, we examine every vault $j$ up to $i$ and consider including vault $j$ in the optimal subset.  
 If vault $j$ is chosen, all vaults from $(j - k)$ through $(j - 1)$ must be excluded, and the best total including $v_j$ becomes $v_j + OPT[j - k - 1]$.  
-The maximum of all such choices for $j$ yields $OPT[i]$.
+The maximum of all such choices for vault $j$ yields $OPT[i]$.
 
 \vspace{1em}
 
@@ -369,12 +369,12 @@ k = 2
 \begin{enumerate}
     \item $OPT[0] = 0$
     \item $OPT[1] = \max(v_1) = 1$
-    \item $OPT[2] = \max(v_1, v_2) = 2$
-    \item $OPT[3] = \max(v_1, v_2, v_3 + OPT[0]) = \max(1, 2, 3 + 0) = 3$
+    \item $OPT[2] = \max(v_1, v_2) = \max(1,2) = 2$
+    \item $OPT[3] = \max(v_1, v_2, v_3) = \max(1, 2, 3) = 3$
     \item $OPT[4] = \max(v_1, v_2, v_3, v_4 + OPT[1]) = \max(1, 2, 3, 4 + 1) = 5$
-    \item $OPT[5] = \max(v_1, v_2, v_3, v_4, v_5 + OPT[2]) = \max(1, 2, 3, 4, 5 + 2) = 7$
-    \item $OPT[6] = \max(v_1, \dots, v_6 + OPT[3]) = \max(1, 2, 3, 4, 5, 6 + 3) = 9$
-    \item $OPT[7] = \max(v_1, \dots, v_7 + OPT[4]) = \max(1, 2, 3, 4, 5, 6, 7 + 5) = 12$
+    \item $OPT[5] = \max(v_1, v_2, v_3, v_4 + OPT[1], v_5 + OPT[2]) = \max(1, 2, 3, 4+1, 5 + 2) = 7$
+    \item $OPT[6] = \max(v_1, v_2, v_3, v_4 + OPT[1], v_5 + OPT[2], v_6 + OPT[3]) = \max(1, 2, 3, 4+1, 5+2, 6 + 3) = 9$
+    \item $OPT[7] = \max(v_1, v_2, v_3, v_4 + OPT[1], v_5 + OPT[2], v_6 + OPT[3], v_7 + OPT[4]) = \max(1, 2, 3, 4+1, 5+2, 6+3, 7 + 5) = 12$
 \end{enumerate}
 
 At the end of the recursive computation:
@@ -463,13 +463,13 @@ OPT[i] = \max_{1 \leq j \leq i} \{ OPT[i - 1],\; v_j + OPT[j - k - 1] \}.
 
 \begin{enumerate}
     \item $OPT[0] = 0$
-    \item $i = 1$: $include = 1$, so $OPT[1] = 1$
-    \item $i = 2$: $include = 2$, so $OPT[2] = 2$
-    \item $i = 3$: $include = 3 + OPT[0] = 3$, so $OPT[3] = \max(2, 3) = 3$
-    \item $i = 4$: $include = 4 + OPT[1] = 4 + 1 = 5$, so $OPT[4] = \max(3, 5) = 5$
-    \item $i = 5$: $include = 5 + OPT[2] = 5 + 2 = 7$, so $OPT[5] = \max(5, 7) = 7$
-    \item $i = 6$: $include = 6 + OPT[3] = 6 + 3 = 9$, so $OPT[6] = \max(7, 9) = 9$
-    \item $i = 7$: $include = 7 + OPT[4] = 7 + 5 = 12$, so $OPT[7] = \max(9, 12) = 12$
+    \item $OPT[1] = \max(v_1) = 1$
+    \item $OPT[2] = \max(v_1, v_2) = \max(1,2) = 2$
+    \item $OPT[3] = \max(v_1, v_2, v_3) = \max(1, 2, 3) = 3$
+    \item $OPT[4] = \max(v_1, v_2, v_3, v_4 + OPT[1]) = \max(1, 2, 3, 4 + 1) = 5$
+    \item $OPT[5] = \max(v_1, v_2, v_3, v_4 + OPT[1], v_5 + OPT[2]) = \max(1, 2, 3, 4+1, 5 + 2) = 7$
+    \item $OPT[6] = \max(v_1, v_2, v_3, v_4 + OPT[1], v_5 + OPT[2], v_6 + OPT[3]) = \max(1, 2, 3, 4+1, 5+2, 6 + 3) = 9$
+    \item $OPT[7] = \max(v_1, v_2, v_3, v_4 + OPT[1], v_5 + OPT[2], v_6 + OPT[3], v_7 + OPT[4]) = \max(1, 2, 3, 4+1, 5+2, 6+3, 7 + 5) = 12$
 \end{enumerate}
 
 At the end of the loop:
@@ -503,7 +503,7 @@ with a total value of:
 
 \noindent\textbf{Theorem.}  
 
-Let $v[1, \ldots, n]$ be nonnegative vault values and $k \ge 0$ the spacing constraint.  
+Let $[v_1, \ldots, v_n]$ be nonnegative vault values and $k \ge 0$ the spacing constraint.  
 Define the dynamic programming recurrence:
 \[
 \text{OPT}[i] =
@@ -541,7 +541,7 @@ We define $\text{opt\_total}(i) = 0$ for all $i \le 0$ so that the recurrence re
 
     \begin{enumerate}
         \item Let $\text{opt\_ind}^*(x+1)$ denote the selection achieving $\text{opt\_total}(x+1)$.  
-        To obtain the optimal value at index $x+1$, we examine all feasible choices of indices $1 \le j \le x+1$.
+        To obtain the optimal value at index $x+1$, we examine all feasible choices of indices $1 \le j \le x+1$, which which is exactly what the max over $j$ in the recurrence captures, ensuring that the algorithm considers every valid way to include a vault while respecting the $k$-spacing constraint.
         
         \item There are two possible cases:
         \begin{enumerate}
@@ -554,18 +554,18 @@ We define $\text{opt\_total}(i) = 0$ for all $i \le 0$ so that the recurrence re
             $\{1, \ldots, (x+1) - k - 1\}$.  
             Thus, 
             \[
-            \text{opt\_total}(x+1) = v[x+1] + \text{opt\_total}((x+1) - k - 1).
+            \text{opt\_total}(x+1) = v_{x+1} + \text{opt\_total}((x+1) - k - 1).
             \]
             By the induction hypothesis, $\text{opt\_total}((x+1) - k - 1) = \text{OPT}[(x+1) - k - 1]$,  
             so 
             \[
-            \text{opt\_total}(x+1) = v[x+1] + \text{OPT}[(x+1) - k - 1].
+            \text{opt\_total}(x+1) = v_{x+1} + \text{OPT}[(x+1) - k - 1].
             \]
         \end{enumerate}
         
         \item Therefore, considering both cases,
         \[
-        \text{opt\_total}(x+1) = \max\{\text{OPT}[x],\, v[x+1] + \text{OPT}[(x+1) - k - 1]\} = \text{OPT}[x+1].
+        \text{opt\_total}(x+1) = \max\{\text{OPT}[x],\, v_{x+1} + \text{OPT}[(x+1) - k - 1]\} = \text{OPT}[x+1].
         \]
     \end{enumerate}
 \end{enumerate}
@@ -580,12 +580,12 @@ Hence, the algorithm’s computed total value is \textbf{optimal}.
 To show that the backtracking reconstruction produces a feasible set (one that satisfies the $k$-spacing constraint), we proceed as follows:
 
 \begin{enumerate}
-    \item Initialize $i = n$ and run the backtrack procedure:  
+    \item Initialize $i = n$ and run the backtrack procedure, which ensures that the algorithm examines all selected vaults so that no feasible choice is excluded:  
 
     \begin{enumerate}
         \item If $\text{OPT}[i] = \text{OPT}[i-1]$, then the exclude-branch yields the optimal total at $i$, meaning that $i$ is not included in any optimal solution. We then set $i \leftarrow i - 1$.
 
-        \item If $\text{OPT}[i] \neq \text{OPT}[i-1]$, then by the recurrence relation we have $\text{OPT}[i] = v[i] + \text{OPT}[i-k-1]$.  
+        \item If $\text{OPT}[i] \neq \text{OPT}[i-1]$, then by the recurrence relation we have $\text{OPT}[i] = v_i + \text{OPT}[i-k-1]$.  
         Thus, some optimal solution includes vault $i$. We record index $i$ and then set $i \leftarrow i - k - 1$.
 
 
@@ -620,7 +620,7 @@ OPT[i] = \max_{1 \leq j \leq i} \{ v_j + OPT[j - k - 1] \}.
 The inner loop therefore runs in $O(i)$ time for each $i$, and since $i$ ranges from $1$ to $n$, the total time is:
 
 \[
-T(n) = \sum_{i=1}^{n} O(i) = O(n^2).
+T(n) = \sum_{i=1}^{n} O(i) = \sum_{i=1}^{n} O(n) = O(n^2).
 \]
 
 Memoization ensures that no subproblem is recomputed, so the total number of function calls is $O(n)$, and the dominant cost arises from the nested loop over $j$.
@@ -632,7 +632,7 @@ The bottom-up version explicitly computes all $n$ states iteratively using the s
 For each $i$ from $1$ to $n$, it iterates through all $j$ from $1$ to $i$, resulting in the same cost:
 
 \[
-T(n) = \sum_{i=1}^{n} O(i) = O(n^2).
+T(n) = \sum_{i=1}^{n} O(i) = \sum_{i=1}^{n} O(n) = O(n^2).
 \]
 
 Thus, both algorithms have:
@@ -707,13 +707,13 @@ We fill the $OPT$ table iteratively using the recurrence relation.
 
 \begin{enumerate}
     \item $OPT[0] = 0$
-    \item $i = 1$: $include = 1$, so $OPT[1] = \max(0, 1) = 1$
-    \item $i = 2$: $include = 2$, so $OPT[2] = \max(1, 2) = 2$
-    \item $i = 3$: $include = 3 + OPT[0] = 3$, so $OPT[3] = \max(2, 3) = 3$
-    \item $i = 4$: $include = 4 + OPT[1] = 4 + 1 = 5$, so $OPT[4] = \max(3, 5) = 5$
-    \item $i = 5$: $include = 5 + OPT[2] = 5 + 2 = 7$, so $OPT[5] = \max(5, 7) = 7$
-    \item $i = 6$: $include = 6 + OPT[3] = 6 + 3 = 9$, so $OPT[6] = \max(7, 9) = 9$
-    \item $i = 7$: $include = 7 + OPT[4] = 7 + 5 = 12$, so $OPT[7] = \max(9, 12) = 12$
+    \item $OPT[1] = \max(OPT[0], v_1) = \max(0,1) = 1$
+    \item $OPT[2] = \max(OPT[1], v_2) = \max(1,2) = 2$
+    \item $OPT[3] = \max(OPT[2], v_3) = \max(2, 3) = 3$
+    \item $OPT[4] = \max(OPT[3], v_4 + OPT[1]) = \max(3, 4 + 1) = 5$
+    \item $OPT[5] = \max(OPT[4], v_5 + OPT[2]) = \max(5, 5 + 2) = 7$
+    \item $OPT[6] = \max(OPT[5], v_6 + OPT[3]) = \max(7, 6 + 3) = 9$    
+    \item $OPT[7] = \max(OPT[6], v_7 + OPT[4]) = \max(9, 7 + 5) = 12$
 \end{enumerate}
 
 At the end of the loop:
@@ -741,7 +741,7 @@ with a total value of $1 + 4 + 7 = 12$.
 
 \noindent\textbf{Theorem.}  
 
-Let $v[1, \ldots, n]$ be nonnegative vault values and $k \ge 0$ the spacing constraint.  
+Let $[v_1, \ldots, v_n]$ be nonnegative vault values and $k \ge 0$ the spacing constraint.  
 Define the recurrence:
 \[
 \text{OPT}[i] =
@@ -779,7 +779,7 @@ We define $\text{opt\_total}(i) = 0$ for all $i \le 0$ so that the recurrence is
 
     \begin{enumerate}
         \item Let $\text{opt\_ind}^*(x+1)$ be the selection achieving $\text{opt\_total}(x+1)$.  
-        \item To achieve the optimal total at index $x+1$, there are two possible cases:
+        \item To achieve the optimal total at index $x+1$, there are two possible cases, which are defined within the recurrence relation:
 
         \begin{enumerate}
             \item[(a)] \textbf{Case 1:} Vault $x+1$ is \emph{not selected}.  
@@ -791,19 +791,19 @@ We define $\text{opt\_total}(i) = 0$ for all $i \le 0$ so that the recurrence is
             $\{1, \ldots, (x+1) - k - 1\}$.  
             Thus, 
             \[
-            \text{opt\_total}(x+1) = v[x+1] + \text{opt\_total}((x+1) - k - 1).
+            \text{opt\_total}(x+1) = v_{x+1} + \text{opt\_total}((x+1) - k - 1).
             \]
             By the induction hypothesis,  
             $\text{opt\_total}((x+1) - k - 1) = \text{OPT}[(x+1) - k - 1]$,  
             so
             \[
-            \text{opt\_total}(x+1) = v[x+1] + \text{OPT}[(x+1) - k - 1].
+            \text{opt\_total}(x+1) = v_{x+1} + \text{OPT}[(x+1) - k - 1].
             \]
         \end{enumerate}
 
-        \item Therefore, combining both cases,
+        \item Therefore, combining both cases result in the same expression as the recurrence equation:
         \[
-        \text{opt\_total}(x+1) = \max\{\text{OPT}[x],\, v[x+1] + \text{OPT}[(x+1) - k - 1]\} = \text{OPT}[x+1].
+        \text{opt\_total}(x+1) = \max\{\text{OPT}[x],\, v_{x+1} + \text{OPT}[(x+1) - k - 1]\} = \text{OPT}[x+1].
         \]
     \end{enumerate}
 \end{enumerate}
@@ -824,7 +824,7 @@ To show that the backtracking reconstruction produces a feasible set (one that s
     \begin{enumerate}
         \item If $\text{OPT}[i] = \text{OPT}[i-1]$, then the exclude-branch yields the optimal total at $i$, meaning that $i$ is not included in any optimal solution. We then set $i \leftarrow i - 1$.
 
-        \item If $\text{OPT}[i] \neq \text{OPT}[i-1]$, then by the recurrence relation we have $\text{OPT}[i] = v[i] + \text{OPT}[i-k-1]$.  
+        \item If $\text{OPT}[i] \neq \text{OPT}[i-1]$, then by the recurrence relation we have $\text{OPT}[i] = v_i + \text{OPT}[i-k-1]$.  
         Thus, some optimal solution includes vault $i$. We record index $i$ and then set $i \leftarrow i - k - 1$.
 
 
@@ -1317,7 +1317,7 @@ Program 3 was the most challenging to implement due to its exponential time comp
 
 \vspace{1em}
 
-Programs 4A and 4B were implemented using dynamic programming with quadratic time complexity, O($n^2$). Implementing these algorithms required careful attention to the recurrence relations and the k-spacing constraints. Comparing the two variants, we observed slight differences in runtime efficiency. Proving correctness and feasibility involved structured induction and backtracking proofs, reinforcing our understanding of formal algorithmic reasoning.
+Programs 4A and 4B were implemented using dynamic programming with quadratic time complexity, O($n^2$). Implementing these algorithms required careful attention to the recurrence relations and the $k$-spacing constraints. Comparing the two variants, we observed slight differences in runtime efficiency. Proving correctness and feasibility involved structured induction and backtracking proofs, reinforcing our understanding of formal algorithmic reasoning.
 
 \vspace{1em}
 
