@@ -14,10 +14,12 @@ def program4B(n: int, k: int, values: List[int]) -> Tuple[int, List[int]]:
     int:  maximal total value
     List[int]: the indices of the chosen vaults(1-indexed)
     """
+    # initialize the OPT array and first element 
     OPT = [0] * (n+1)
     OPT[0] = 0
     vaults = []
 
+    # fill the OPT array
     for i in range(1, n + 1):
         OPT[i] = OPT[i - 1]
         for j in range(1, i+1):
@@ -35,7 +37,7 @@ def program4B(n: int, k: int, values: List[int]) -> Tuple[int, List[int]]:
         else:
             i -= 1
 
-    return OPT[n], vaults[::-1]  # Placeholder return statement
+    return OPT[n], vaults[::-1]  
 
 
 if __name__ == '__main__':
