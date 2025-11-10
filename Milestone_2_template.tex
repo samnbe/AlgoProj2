@@ -137,7 +137,98 @@ This algorithm does \textbf{not} use memoization. Therefore, the same subproblem
 
 
 \subsubsection{Correctness Proof}
-{\color{red} Provide a clear argument or formal proof that your algorithm always gives the correct solution for ProblemG.}
+
+\noindent\textbf{Theorem.}  
+
+Let $v[1, \ldots, n]$ be nonnegative vault values and $k \ge 0$ the spacing constraint. Define the recurrence  
+\[
+\text{OPT}[i] =
+\begin{cases}
+0, & \text{if } i \le 0, \\
+\max\{\text{OPT}[i-1], v_i + \text{OPT}[i-k-1]\}, & \text{otherwise.}
+\end{cases}
+\]
+Then, $\text{OPT}[n]$ equals the maximum achievable total vault value over all feasible selections.  
+
+Using the standard backtrack rule:
+\[
+\text{If } \text{OPT}[i] \neq \text{OPT}[i-1] \Rightarrow \text{include } i \text{ and set } i \leftarrow i - k - 1; \quad
+\text{else set } i \leftarrow i - 1,
+\]
+then the algorithm returns an optimal feasible set of indices of vaults.
+
+\vspace{1em}
+
+\noindent\textbf{Optimality Proof.} [by induction on $i$]  
+
+Let $\text{opt\_ind}(i)$ be the set of feasible selections using only indices in $\{1, \ldots, i\}$, and let $\text{opt\_total}(i)$ denote the true optimal total value achievable using these indices.  
+We define $\text{opt\_total}(i) = 0$ for $i \le 0$, ensuring the recurrence is well-defined when $i - k - 1 \le 0$.
+
+\begin{enumerate}
+    \item \textbf{Base case:}  
+    When there are no vaults available ($i \le 0$), the maximum possible total value is $0$, so $\text{opt\_total}(i) = 0$.  
+    The algorithm sets $\text{OPT}[i] = 0$ in this case, hence $\text{OPT}[i] = \text{opt\_total}(i)$ for all $i \le 0$.
+    
+    \item \textbf{Inductive step:}  
+    Assume for some $x \ge 0$ that $\text{OPT}[j] = \text{opt\_total}(j)$ for all $j \le x$.  
+    We will show that $\text{OPT}[x+1] = \text{opt\_total}(x+1)$.
+    
+    \begin{enumerate}
+        \item Let $\text{opt\_ind}^*(x+1)$ achieve $\text{opt\_total}(x+1)$.  
+        To obtain the optimal value at $x+1$, there are two possible cases:
+        
+        \item[(a)] \textbf{Case 1:} Vault $x+1$ is \emph{not selected}.  
+        Then $\text{opt\_ind}^*(x+1)$ only includes indices within $\{1, \ldots, x\}$, so the total value is $\text{opt\_total}(x)$.  
+        Thus, $\text{opt\_total}(x+1) = \text{opt\_total}(x) = \text{OPT}[x]$.
+        
+        \item[(b)] \textbf{Case 2:} Vault $x+1$ \emph{is selected}.  
+        Because of the $k$-spacing constraint, we cannot select any of the previous $k$ vaults, so the feasible set is $\text{opt\_ind}((x+1) - k - 1)$.  
+        Hence, $\text{opt\_total}(x+1) = v[x+1] + \text{opt\_total}((x+1) - k - 1)$.  
+        By the induction hypothesis, $\text{opt\_total}((x+1) - k - 1) = \text{OPT}[(x+1) - k - 1]$,  
+        so $\text{opt\_total}(x+1) = v[x+1] + \text{OPT}[(x+1) - k - 1]$.
+    \end{enumerate}
+    
+    Therefore, the optimal value at index $x+1$ is obtained by taking the maximum of these two cases:
+    \[
+    \text{opt\_total}(x+1) = \max\{\text{OPT}[x],\, v[x+1] + \text{OPT}[(x+1) - k - 1]\} = \text{OPT}[x+1].
+    \]
+    This completes the induction.
+\end{enumerate}
+
+By induction, $\text{OPT}[n] = \text{opt\_total}(n)$, so the algorithm correctly computes the maximum total vault value.  
+Therefore, the total value given by this algorithm is \textbf{optimal}.
+
+\vspace{1em}
+
+\noindent\textbf{Feasibility Proof.}  
+
+To show that the backtracking reconstruction produces a feasible set (one that satisfies the $k$-spacing constraint), we proceed as follows:
+
+\begin{enumerate}
+    \item Initialize $i = n$ and run the backtrack procedure:  
+
+    \begin{enumerate}
+        \item If $\text{OPT}[i] = \text{OPT}[i-1]$, then the exclude-branch yields the optimal total at $i$, meaning that $i$ is not included in any optimal solution. We then set $i \leftarrow i - 1$.
+
+        \item If $\text{OPT}[i] \neq \text{OPT}[i-1]$, then by the recurrence relation we have $\text{OPT}[i] = v[i] + \text{OPT}[i-k-1]$.  
+        Thus, some optimal solution includes vault $i$. We record index $i$ and then set $i \leftarrow i - k - 1$.
+
+
+        \item Because of this jump by $k + 1$ positions, no index within the interval $[i - k, \ldots, i - 1]$ can be included in the solution.  
+        Therefore, all selected indices differ by at least $k + 1$.
+    \end{enumerate}
+ 
+\end{enumerate}
+
+Hence, the reconstructed solution satisfies the $k$-spacing constraint and is feasible.  
+At each step, the inclusion or exclusion of $i$ aligns with the recurrence defining $\text{OPT}$, ensuring the recorded indices yield exactly $\text{OPT}[n]$.  
+
+\vspace{1em}
+
+\noindent\textbf{Conclusion:}  
+Both the feasibility and optimality proofs demonstrate that the dynamic programming algorithm produces a valid (feasible) and optimal set of vault selections under the $k$-spacing constraint.  
+Therefore, the algorithm is \textbf{correct}.
+
 
 \subsubsection{Runtime Analysis}
 
@@ -410,41 +501,109 @@ with a total value of:
 
 \subsubsection{Correctness Proof}
 
-{\color{red} Provide a clear argument or formal proof that your algorithm always gives the correct solution for ProblemG.\\
-
-Example using Knapsack problem:\\  
-}
-
 \noindent\textbf{Theorem.}  
-The DP formulation correctly computes the optimal solution for Knapsack problem
 
-\noindent\textbf{Proof.}\\
-
-We show that the Knapsack problem satisfies the optimal substructure property,  
-and that the recursive formulation correctly expresses it.
-
-Let $O_n$ be an optimal subset of items for a knapsack of capacity $W$ and $n$ total items.
-
-\textbf{Case 1:} Item $n$ is not included in $O_n$.  
-Then $O_n$ must also be an optimal subset of the first $n-1$ items with the same capacity $W$.  
-If there were a subset $Q$ of the first $n-1$ items with higher total value,  
-then $Q$ would also be a better solution for the full problem, contradicting the optimality of $O_n$.
-
-\textbf{Case 2:} Item $n$ is included in $O_n$.  
-Then the remaining items $O_n - \{n\}$ form an optimal subset of the first $n-1$ items  
-with capacity $W - w_n$.  
-If $O_n - \{n\}$ were not optimal for that subproblem,  
-there would exist another subset $Q$ with higher total value and total weight not exceeding $W - w_n$.  
-Adding item $n$ to $Q$ would give a feasible solution for the full problem with higher value than $O_n$,  
-contradicting its optimality.
-
-From these two cases, any optimal solution for $(n, W)$ must come from one of two optimal subproblems:
+Let $v[1, \ldots, n]$ be nonnegative vault values and $k \ge 0$ the spacing constraint.  
+Define the dynamic programming recurrence:
 \[
-\text{either } (n-1, W) \text{ (excluding item $n$)} \quad \text{or} \quad (n-1, W - w_n) \text{ (including item $n$)}.
+\text{OPT}[i] =
+\begin{cases}
+0, & \text{if } i \le 0, \\
+\max_{1 \le j \le i}\{v_j + \text{OPT}[j - k - 1]\}, & \text{otherwise.}
+\end{cases}
 \]
+Then, $\text{OPT}[n]$ equals the maximum achievable total vault value over all feasible selections.  
 
-Hence, the Knapsack problem satisfies the optimal substructure property,  
-and the recursive formulation correctly captures this relationship.
+Using the standard backtrack rule:
+\[
+\text{If } \text{OPT}[i] \ne \text{OPT}[i-1] \Rightarrow \text{include } i \text{ and set } i \leftarrow i - k - 1; 
+\quad \text{else set } i \leftarrow i - 1,
+\]
+the algorithm then returns an optimal feasible set of indices of vaults.
+
+\vspace{1em}
+
+\noindent\textbf{Optimality Proof.} [by induction on $i$]  
+
+Let $\text{opt\_ind}(i)$ denote the set of feasible selections using only indices in $\{1, \ldots, i\}$,  
+and let $\text{opt\_total}(i)$ be the true optimal total vault value over this prefix.  
+We define $\text{opt\_total}(i) = 0$ for all $i \le 0$ so that the recurrence remains well-defined when $i - k - 1 \le 0$.
+
+\begin{enumerate}
+    \item \textbf{Base case:}  
+    When there are no vaults available ($i \le 0$), the maximum total vault value is $0$,  
+    meaning $\text{opt\_total}(i) = 0$.  
+    The algorithm sets $\text{OPT}[i] = 0$ for all $i \le 0$, hence $\text{OPT}[i] = \text{opt\_total}(i)$ for all $i \le 0$.
+
+    \item \textbf{Inductive step:}  
+    Assume that for some $x \ge 0$, we have $\text{OPT}[j] = \text{opt\_total}(j)$ for every $j \le x$.  
+    We now show that $\text{OPT}[x+1] = \text{opt\_total}(x+1)$.
+
+    \begin{enumerate}
+        \item Let $\text{opt\_ind}^*(x+1)$ denote the selection achieving $\text{opt\_total}(x+1)$.  
+        To obtain the optimal value at index $x+1$, we examine all feasible choices of indices $1 \le j \le x+1$.
+        
+        \item There are two possible cases:
+        \begin{enumerate}
+            \item[(a)] \textbf{Case 1:} Vault $x+1$ is \emph{not selected}.  
+            Then $\text{opt\_ind}^*(x+1)$ only includes indices up to $x$,  
+            so $\text{opt\_total}(x+1) = \text{opt\_total}(x) = \text{OPT}[x]$.
+            
+            \item[(b)] \textbf{Case 2:} Vault $x+1$ \emph{is selected}.  
+            Because of the $k$-spacing constraint, the next possible vault to include must come from  
+            $\{1, \ldots, (x+1) - k - 1\}$.  
+            Thus, 
+            \[
+            \text{opt\_total}(x+1) = v[x+1] + \text{opt\_total}((x+1) - k - 1).
+            \]
+            By the induction hypothesis, $\text{opt\_total}((x+1) - k - 1) = \text{OPT}[(x+1) - k - 1]$,  
+            so 
+            \[
+            \text{opt\_total}(x+1) = v[x+1] + \text{OPT}[(x+1) - k - 1].
+            \]
+        \end{enumerate}
+        
+        \item Therefore, considering both cases,
+        \[
+        \text{opt\_total}(x+1) = \max\{\text{OPT}[x],\, v[x+1] + \text{OPT}[(x+1) - k - 1]\} = \text{OPT}[x+1].
+        \]
+    \end{enumerate}
+\end{enumerate}
+
+By induction, $\text{OPT}[n] = \text{opt\_total}(n)$, so the algorithm correctly computes the maximum total value.  
+Hence, the algorithm’s computed total value is \textbf{optimal}.
+
+\vspace{1em}
+
+\noindent\textbf{Feasibility Proof.}  
+
+To show that the backtracking reconstruction produces a feasible set (one that satisfies the $k$-spacing constraint), we proceed as follows:
+
+\begin{enumerate}
+    \item Initialize $i = n$ and run the backtrack procedure:  
+
+    \begin{enumerate}
+        \item If $\text{OPT}[i] = \text{OPT}[i-1]$, then the exclude-branch yields the optimal total at $i$, meaning that $i$ is not included in any optimal solution. We then set $i \leftarrow i - 1$.
+
+        \item If $\text{OPT}[i] \neq \text{OPT}[i-1]$, then by the recurrence relation we have $\text{OPT}[i] = v[i] + \text{OPT}[i-k-1]$.  
+        Thus, some optimal solution includes vault $i$. We record index $i$ and then set $i \leftarrow i - k - 1$.
+
+
+        \item Because of this jump by $k + 1$ positions, no index within the interval $[i - k, \ldots, i - 1]$ can be included in the solution.  
+        Therefore, all selected indices differ by at least $k + 1$.
+    \end{enumerate}
+ 
+\end{enumerate}
+
+Hence, the reconstructed solution satisfies the $k$-spacing constraint and is feasible.  
+At each step, the inclusion or exclusion of $i$ aligns with the recurrence defining $\text{OPT}$, ensuring the recorded indices yield exactly $\text{OPT}[n]$.
+
+\vspace{1em}
+
+\noindent\textbf{Conclusion:}  
+Both the feasibility and optimality proofs demonstrate that the dynamic programming algorithm always yields a valid (feasible) and optimal vault selection under the $k$-spacing constraint.  
+Therefore, the algorithm is \textbf{correct}.
+
 
 
 
@@ -579,7 +738,111 @@ with a total value of $1 + 4 + 7 = 12$.
 
 
 \subsubsection{Correctness Proof}
-{\color{red} Provide a clear argument or formal proof that your algorithm always gives the correct solution for ProblemG.}
+
+\noindent\textbf{Theorem.}  
+
+Let $v[1, \ldots, n]$ be nonnegative vault values and $k \ge 0$ the spacing constraint.  
+Define the recurrence:
+\[
+\text{OPT}[i] =
+\begin{cases}
+0, & \text{if } i \le 0, \\
+\max\{\text{OPT}[i-1],\, v_i + \text{OPT}[i - k - 1]\}, & \text{otherwise.}
+\end{cases}
+\]
+Then, $\text{OPT}[n]$ equals the maximum achievable total value over all feasible selections.  
+
+Using the standard backtrack rule:
+\[
+\text{If } \text{OPT}[i] \ne \text{OPT}[i-1] \Rightarrow \text{include } i \text{ and set } i \leftarrow i - k - 1; 
+\quad \text{else set } i \leftarrow i - 1,
+\]
+the algorithm then returns an optimal feasible set of vault indices.
+
+\vspace{1em}
+
+\noindent\textbf{Optimality Proof.} [by induction on $i$]  
+
+Let $\text{opt\_ind}(i)$ denote the set of feasible selections using only indices from $\{1, \ldots, i\}$,  
+and let $\text{opt\_total}(i)$ denote the true optimal total vault value for this prefix.  
+We define $\text{opt\_total}(i) = 0$ for all $i \le 0$ so that the recurrence is well-defined when $i - k - 1 \le 0$.
+
+\begin{enumerate}
+    \item \textbf{Base case:}  
+    When there are no vaults available ($i \le 0$), the maximum possible total vault value is $0$,  
+    i.e., $\text{opt\_total}(i) = 0$.  
+    The algorithm sets $\text{OPT}[i] = 0$ for $i \le 0$, hence $\text{OPT}[i] = \text{opt\_total}(i)$ for all $i \le 0$.
+
+    \item \textbf{Inductive step:}  
+    Assume for some $x \ge 0$ that $\text{OPT}[j] = \text{opt\_total}(j)$ for every $j \le x$.  
+    We now show that $\text{OPT}[x+1] = \text{opt\_total}(x+1)$.
+
+    \begin{enumerate}
+        \item Let $\text{opt\_ind}^*(x+1)$ be the selection achieving $\text{opt\_total}(x+1)$.  
+        \item To achieve the optimal total at index $x+1$, there are two possible cases:
+
+        \begin{enumerate}
+            \item[(a)] \textbf{Case 1:} Vault $x+1$ is \emph{not selected}.  
+            Then $\text{opt\_ind}^*(x+1)$ only includes indices up to $x$,  
+            so the total value is $\text{opt\_total}(x+1) = \text{opt\_total}(x) = \text{OPT}[x]$.
+
+            \item[(b)] \textbf{Case 2:} Vault $x+1$ \emph{is selected}.  
+            Because of the $k$-spacing constraint, the next vault that can be chosen must lie within  
+            $\{1, \ldots, (x+1) - k - 1\}$.  
+            Thus, 
+            \[
+            \text{opt\_total}(x+1) = v[x+1] + \text{opt\_total}((x+1) - k - 1).
+            \]
+            By the induction hypothesis,  
+            $\text{opt\_total}((x+1) - k - 1) = \text{OPT}[(x+1) - k - 1]$,  
+            so
+            \[
+            \text{opt\_total}(x+1) = v[x+1] + \text{OPT}[(x+1) - k - 1].
+            \]
+        \end{enumerate}
+
+        \item Therefore, combining both cases,
+        \[
+        \text{opt\_total}(x+1) = \max\{\text{OPT}[x],\, v[x+1] + \text{OPT}[(x+1) - k - 1]\} = \text{OPT}[x+1].
+        \]
+    \end{enumerate}
+\end{enumerate}
+
+By induction, $\text{OPT}[n] = \text{opt\_total}(n)$,  
+so the algorithm correctly computes the optimal total value.  
+Therefore, the computed total by this algorithm is \textbf{optimal}.
+
+\vspace{1em}
+
+\noindent\textbf{Feasibility Proof.}  
+
+To show that the backtracking reconstruction produces a feasible set (one that satisfies the $k$-spacing constraint), we proceed as follows:
+
+\begin{enumerate}
+    \item Initialize $i = n$ and run the backtrack procedure:  
+
+    \begin{enumerate}
+        \item If $\text{OPT}[i] = \text{OPT}[i-1]$, then the exclude-branch yields the optimal total at $i$, meaning that $i$ is not included in any optimal solution. We then set $i \leftarrow i - 1$.
+
+        \item If $\text{OPT}[i] \neq \text{OPT}[i-1]$, then by the recurrence relation we have $\text{OPT}[i] = v[i] + \text{OPT}[i-k-1]$.  
+        Thus, some optimal solution includes vault $i$. We record index $i$ and then set $i \leftarrow i - k - 1$.
+
+
+        \item Because of this jump by $k + 1$ positions, no index within the interval $[i - k, \ldots, i - 1]$ can be included in the solution.  
+        Therefore, all selected indices differ by at least $k + 1$.
+    \end{enumerate}
+ 
+\end{enumerate}
+
+Hence, the reconstructed solution satisfies the $k$-spacing constraint and is feasible.  
+At each step, the inclusion or exclusion of $i$ aligns with the recurrence defining $\text{OPT}$, ensuring the recorded indices yield exactly $\text{OPT}[n]$. 
+
+\vspace{1em}
+
+\noindent\textbf{Conclusion:}  
+Both the feasibility and optimality proofs show that the dynamic programming algorithm always produces a valid (feasible) and optimal vault selection under the $k$-spacing constraint.  
+Therefore, the algorithm is \textbf{correct}.
+
 
 \subsubsection{Runtime Analysis}
 
@@ -617,33 +880,59 @@ Since each iteration takes constant time and both loops run at most $n$ times, t
 
 \section{Experimental Comparative Study}
 
-{\color{red}The goal of the experimental study is to visualize the growth of the running time of the algorithms as the input size increases. Few things that will make the visualization more accurate.
+\subsection{Experimental Setup}
+
+This experimental comparative study was conducted using the \texttt{time} module in Python to measure the runtime of each algorithm.
+
+A \textbf{start time} and \textbf{end time} variable were recorded and subtracted to track the total elapsed running time of each program, measured in seconds.
+
+The following Python function \texttt{test\_runtimes()} was used for tracking the runtimes:
+
+\vspace{1em}
+
+\begin{algorithmic}[1]
+\State \textbf{Input:} spacing parameter $k$, list of input sizes $ns$
+\State \textbf{Output:} runtime measurements for each $n$
+\For{each $n$ in $ns$}
+    \State Generate a list $values$ of length $n$ with random integers between 1 and 1000
+    \State $start\_time \gets$ current time
+    \State Run the algorithm \texttt{program(n, k, values)} to obtain $(\text{max\_value}, \text{chosen})$
+    \State $elapsed \gets$ current time $-$ $start\_time$
+    \State Print $n$ and $elapsed$
+\EndFor
+\end{algorithmic}
+
+\vspace{1em}
+
+\noindent\textbf{Choice of input sizes:} 
+
+Due to the differences in time complexity of the algorithms, different ranges of input sizes were chosen to produce meaningful visualizations of runtime growth:
 
 \begin{itemize}
-    \item Generate datasets with size $n$ that goes high enough. Small values of $n$ leads to an inaccurate visualization.
-    \item Pick uniformly distributed values of $n$. Non uniformly distributed values of n leads to a misleading visualization.
-    \item Use enough samples. Not enough samples of n also leads to an inaccurate visualization.
+    \item \textbf{Program3 O($2^n$):} $n = 10, 20, 30, 40, 50$. Because Program3 has exponential time complexity, larger values of $n$ would result in prohibitively long runtimes. Using small, uniformly spaced values of $n$ allows us to observe the rapid growth of the runtime without exceeding practical computational limits.
+    \item \textbf{Program4A and Program4B O($n^2$):} $n = 100, 200, 300, 400, 500$. Quadratic time complexity allows for moderately larger input sizes while still keeping runtime manageable. Uniformly spaced $n$ values are chosen to accurately visualize the quadratic growth pattern.
+    \item \textbf{Program5 O($n$):} $n = 10000, 20000, 30000, 40000, 50000$. Linear time complexity enables testing on very large inputs, ensuring that the growth trend is clearly observable. Uniform spacing of $n$ helps in producing a consistent visualization of runtime as $n$ increases.
 \end{itemize}
-}
 
-\subsection{Experimental Setup}
-{\color{red} Describe how you generated random datasets, their sizes, and how you measured running times.
+These choices adhere to the goals of the experimental study:
 
-You may include additional plots
+\begin{enumerate}
+    \item \textbf{High enough values of $n$:} Each algorithm is tested on input sizes large enough to capture meaningful differences in runtime growth.
+    \item \textbf{Uniform distribution of $n$:} The selected input sizes are evenly spaced to prevent misleading visualizations of the runtime trend.
+\end{enumerate}
 
+This setup ensures that the growth of runtime for each algorithm can be visualized accurately and compared across different complexities.
 
-}
 
 \subsection{Plot 3}
-{\color{red} Insert your plot of running time for Program 3 vs.\ input size. Explain the observed trend.}
 
 \begin{filecontents}{p3.dat}
 X   Points   Program3
-1   10000    0.016
-2   15000    0.024
-3   20000    0.030
-4   25000    0.036
-5   30000    0.043
+1   10    0.000000
+2   20    0.000920
+3   30    0.020212
+4   40    0.263594
+5   50    6.202015
 \end{filecontents}
 
 \begin{figure}[H]
@@ -657,35 +946,385 @@ X   Points   Program3
     legend style={at={(0.97,0.03)},anchor=south east}
 ]
 \addplot[blue,thick,mark=square*] table [y=Program3,x=X]{p3.dat};
-\addlegendentry{Program 3}
+% \addlegendentry{Program 3}
 \end{axis}
 \end{tikzpicture}
-\caption{Example plot.}
+\caption{Program3 vs. Input Size}
 \label{plot1}
 \end{figure}
 
+\noindent As expected from the exponential time complexity of Program3 O($2^n$), the runtime grows extremely rapidly as $n$ increases. The data illustrates the following trends:
+
+\begin{itemize}
+    \item For small $n$ (10--20), the runtime is negligible, almost zero seconds.  
+    \item As $n$ increases to 30, the runtime begins to grow noticeably (0.02 seconds), reflecting the first signs of exponential growth.  
+    \item By $n = 40$, the runtime increases more than tenfold compared to $n = 30$, showing the steep exponential curve characteristic of O($2^n$) algorithms.  
+    \item At $n = 50$, the runtime jumps dramatically to over 6 seconds. This shows the limitations of exponential algorithms even on moderately sized inputs.  
+\end{itemize}
+
+\noindent This trend reflects the theoretical expectation: exponential algorithms quickly become infeasible as the input size grows, and small increases in $n$ lead to large increases in runtime. The results justify the choice of small input sizes for Program3 in the experimental setup to produce meaningful, measurable runtimes.
+
 \subsection{Plot 4}
-{\color{red} Insert your plot of running time for Program 4A vs.\ input size. Explain the observed trend.}
+
+\begin{filecontents}{p4A.dat}
+X   Points   Program4A
+1   100    0.000000
+2   200    0.018002
+3   300    0.013909
+4   400    0.028095
+5   500    0.034267
+\end{filecontents}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    xlabel=Number of Elements,
+    ylabel=Running Time (seconds),
+    xticklabels from table={p4A.dat}{Points},
+    xtick=data,
+    legend style={at={(0.97,0.03)},anchor=south east}
+]
+\addplot[red,thick,mark=square*] table [y=Program4A,x=X]{p4A.dat};
+% \addlegendentry{Program 3}
+\end{axis}
+\end{tikzpicture}
+\caption{Program4A vs. Input Size}
+\label{plot1}
+\end{figure}
+
+\noindent The runtime trend for Program4A reflects its quadratic time complexity, O($n^2$):
+
+\begin{itemize}
+    \item For smaller input sizes ($n = 100, 200$), runtimes are very low, in the milliseconds.  
+    \item As $n$ increases, the runtime gradually grows, consistent with O($n^2$) growth, though the increase is moderate compared to exponential growth.  
+    \item The trend remains smooth, with runtimes increasing roughly proportionally to the square of $n$. Minor fluctuations are likely due to system timing variations or random input values.  
+\end{itemize}
+
+\noindent Overall, the results demonstrate that Program4A scales efficiently for moderate input sizes, allowing much larger $n$ than Program3.
 
 \subsection{Plot 5}
-{\color{red} Insert your plot of running time for Program 4B vs.\ input size. Explain the observed trend.}
+
+\begin{filecontents}{p4B.dat}
+X   Points   Program4B
+1   100    0.000926
+2   200    0.004995
+3   300    0.007158
+4   400    0.013426
+5   500    0.035091
+\end{filecontents}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    xlabel=Number of Elements,
+    ylabel=Running Time (seconds),
+    xticklabels from table={p4B.dat}{Points},
+    xtick=data,
+    legend style={at={(0.97,0.03)},anchor=south east}
+]
+\addplot[orange,thick,mark=square*] table [y=Program4B,x=X]{p4B.dat};
+% \addlegendentry{Program 3}
+\end{axis}
+\end{tikzpicture}
+\caption{Program4B vs. Input Size}
+\label{plot1}
+\end{figure}
+
+\noindent Similar to Program4A, Program4B exhibits quadratic time complexity:
+
+\begin{itemize}
+    \item Runtimes increase as input size grows from 100 to 500, reflecting O($n^2$) scaling.  
+    \item Growth is more noticeable at larger input sizes, particularly from $n = 400$ to $n = 500$.  
+    \item Small fluctuations in runtime are present, likely caused by system load or the random generation of input values, but the overall trend follows the expected quadratic pattern.  
+\end{itemize}
+
+\noindent These results confirm that Program4B can handle moderately large inputs efficiently, much larger than what would be feasible for Program3.
 
 \subsection{Plot 6}
-{\color{red} Insert your plot of running time for Program 5 vs.\ input size. Explain the observed trend.}
+
+\begin{filecontents}{p5.dat}
+X   Points   Program5
+1   10000    0.004000
+2   20000    0.001142
+3   30000    0.021757
+4   40000    0.022194
+5   50000    0.034442
+\end{filecontents}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    xlabel=Number of Elements,
+    ylabel=Running Time (seconds),
+    xticklabels from table={p5.dat}{Points},
+    xtick=data,
+    legend style={at={(0.97,0.03)},anchor=south east}
+]
+\addplot[green,thick,mark=square*] table [y=Program5,x=X]{p5.dat};
+% \addlegendentry{Program 3}
+\end{axis}
+\end{tikzpicture}
+\caption{Program5 vs. Input Size}
+\label{plot1}
+\end{figure}
+
+\noindent Program5 exhibits linear time complexity, O($n$), which is reflected in the runtimes:
+
+\begin{itemize}
+    \item Runtimes remain very low even for large input sizes from $n = 10{,}000$ to $n = 50{,}000$, consistent with linear scaling.  
+    \item The runtime for $n=20{,}000$ appears lower than $n=10{,}000$, likely due to small system-level timing variations or background processes; however, the overall trend increases roughly linearly with $n$.  
+    \item As $n$ increases, the runtime gradually rises, reaching 0.034 seconds at $n=50{,}000$, which is still very fast and confirms the efficiency of Program5 for large datasets.  
+\end{itemize}
+
+\noindent These results validate that Program5 scales efficiently with input size and justify testing it on significantly larger datasets compared to Program3 and Program4A/4B.
 
 \subsection{Plot 7}
-{\color{red} Overlay Plots 3,4,5,6 and contrasting the performance of Programs 3,4A, 4B,5}
+
+\begin{filecontents}{p3.dat}
+X   Points   Program3
+1   10      0.000000
+2   20      0.000920
+3   30      0.020212
+4   40      0.263594
+5   50      6.202015
+\end{filecontents}
+
+\begin{filecontents}{p4A.dat}
+X   Points   Program4A
+1   100     0.000000
+2   200     0.018002
+3   300     0.013909
+4   400     0.028095
+5   500     0.034267
+\end{filecontents}
+
+\begin{filecontents}{p4B.dat}
+X   Points   Program4B
+1   100     0.000926
+2   200     0.004995
+3   300     0.007158
+4   400     0.013426
+5   500     0.035091
+\end{filecontents}
+
+\begin{filecontents}{p5.dat}
+X   Points   Program5
+1   10000    0.004000
+2   20000    0.001142
+3   30000    0.021757
+4   40000    0.022194
+5   50000    0.034442
+\end{filecontents}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    xlabel=Number of Elements,
+    ylabel=Running Time (seconds),
+    xtick=data,
+    legend style={at={(0.97,0.03)},anchor=south east},
+    xmode=log,
+    ymode=log,
+    legend style={
+        at={(1.05,0.5)},    % position outside to the right
+        anchor=west,        % align legend to the west (left) of this position
+        draw=black,         % add a border around the legend
+        fill=white           % optional: background color
+    },
+]
+
+% Program 3
+\addplot[blue,thick,mark=*] table [y=Program3,x=X]{p3.dat};
+\addlegendentry{Program3}
+
+% Program 4A
+\addplot[red,thick,mark=*] table [y=Program4A,x=X]{p4A.dat};
+\addlegendentry{Program4A}
+
+% Program 4B
+\addplot[orange,thick,mark=*] table [y=Program4B,x=X]{p4B.dat};
+\addlegendentry{Program4B}
+
+% Program 5
+\addplot[green,thick,mark=*] table [y=Program5,x=X]{p5.dat};
+\addlegendentry{Program5}
+
+\end{axis}
+\end{tikzpicture}
+\caption{Overlay of Programs 3, 4A, 4B, 5 vs. Input Size}
+\label{fig:overlay}
+\end{figure}
+
+\noindent The results of the overlay are as follows:
+\begin{itemize}
+    \item Program3 exhibits exponential growth (O($2^n$)), with runtimes increasing rapidly from near-zero at $n=10$ to over 6 seconds at $n=50$, making it practical only for small inputs. 
+    \item Programs 4A and 4B display quadratic growth (O($n^2$)), with moderate runtime increases as $n$ grows from 100 to 500. 
+    \item Program5 scales linearly (O($n$)), handling very large input sizes efficiently from $n=10{,}000$ to $n=50{,}000$, with runtimes remaining low. 
+\end{itemize}
+
+
+\noindent The overlay plot clearly illustrates the differing scaling behaviors and justifies the choice of input sizes for each algorithm.
+
 
 \subsection{Plot 8}
-{\color{red} Overlay Plots 4,5 and contrasting the performance of Programs 4A, 4B}
+
+\begin{filecontents}{p4A.dat}
+X   Points   Program4A
+1   100     0.000000
+2   200     0.018002
+3   300     0.013909
+4   400     0.028095
+5   500     0.034267
+\end{filecontents}
+
+\begin{filecontents}{p4B.dat}
+X   Points   Program4B
+1   100     0.000926
+2   200     0.004995
+3   300     0.007158
+4   400     0.013426
+5   500     0.035091
+\end{filecontents}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    xlabel=Number of Elements,
+    ylabel=Running Time (seconds),
+    xtick=data,
+    legend style={at={(0.97,0.03)},anchor=south east},
+    legend style={
+        at={(1.05,0.5)},    % position outside to the right
+        anchor=west,        % align legend to the west (left) of this position
+        draw=black,         % add a border around the legend
+        fill=white           % optional: background color
+    },
+]
+
+% Program 4A
+\addplot[red,thick,mark=*] table [y=Program4A,x=X]{p4A.dat};
+\addlegendentry{Program4A}
+
+% Program 4B
+\addplot[orange,thick,mark=*] table [y=Program4B,x=X]{p4B.dat};
+\addlegendentry{Program4B}
+
+\end{axis}
+\end{tikzpicture}
+\caption{Overlay of Programs 4A and 4B vs. Input Size}
+\label{fig:overlay}
+\end{figure}
+
+\noindent Observations from the overlay:
+\begin{itemize}
+    \item Both Programs 4A and 4B show quadratic scaling (O($n^2$)), as expected from their algorithmic complexity.
+    \item Runtime increases moderately as $n$ grows from 100 to 500, with Program4B generally slightly faster than Program4A for most input sizes.
+    \item The trend confirms that quadratic algorithms remain feasible for small-to-moderate inputs, but would scale poorly for much larger $n$.
+\end{itemize}
 
 \subsection{Plot 9}
-{\color{red} Insert your plot of output quality comparison $(h_g - h_o)/h_o$ of Algorithm1 and any of Algorithms 3,4,5}
+
+\begin{filecontents}{p1.dat}
+X   Points   Algorithm1
+1   10000    0.00038654
+2   20000    0.00064708
+3   30000    0.00095906
+4   40000    0.00137282
+5   50000    0.00188342
+\end{filecontents}
+
+\begin{filecontents}{p5_output.dat}
+X   Points   Program5
+1   10000    0.004000
+2   20000    0.001142
+3   30000    0.021757
+4   40000    0.022194
+5   50000    0.034442
+\end{filecontents}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    xlabel=Number of Elements,
+    ylabel={Relative Output Difference $(h_g - h_o)/h_o$},
+    xticklabels from table={p1.dat}{Points},
+    xtick=data,
+    legend style={
+        at={(1.05,0.5)},
+        anchor=west,
+        draw=black,
+        fill=white
+    },
+]
+
+% Compute relative difference for Program5
+\addplot[red,thick,mark=*] table[x=X, y expr={(\thisrow{Algorithm1}-\thisrow{Program5})/\thisrow{Program5}}]{%
+X Algorithm1 Program5
+1 0.00038654 0.004000
+2 0.00064708 0.001142
+3 0.00095906  0.021757
+4 0.00137282 0.022194
+5 0.00188342 0.034442
+};
+\addlegendentry{Algorithm1 vs Program5}
+
+\end{axis}
+\end{tikzpicture}
+\caption{Relative output quality comparison: Algorithm1 vs Program5}
+\label{fig:quality_compare}
+\end{figure}
+
+\noindent The relative output difference between Algorithm1 and Program5, computed as $(h_g - h_o)/h_o$, exhibits the following trends:
+
+\begin{itemize}
+    \item For smaller input sizes ($n=10{,}000$ and $n=20{,}000$), the relative difference is quite low, around $-0.903$ and $-0.433$, indicating that Algorithm1 produces slightly lower outputs than Program5 in relative terms.  
+    \item As the input size increases, the relative differences fluctuate, with negative values at $n=10{,}000$ and $n=20{,}000$ and smaller negative differences at $n=30{,}000$ to $n=50{,}000$. This suggests that Algorithm1 consistently produces outputs of comparable magnitude to Program5, though slightly smaller.  
+    \item The magnitude of the relative difference generally remains under 1 for all tested input sizes, indicating that Algorithm1 maintains reasonable accuracy compared to Program5 across the tested range.  
+    \item These results highlight that while Program5 may achieve slightly higher absolute values in this metric, Algorithm1 still produces outputs of similar scale, validating its effectiveness for large datasets.  
+\end{itemize}
+
+\noindent Overall, Algorithm1 provides competitive output quality relative to Program5, with relative differences small enough to justify using Algorithm1 when its computational advantages are considered.
+
 
 \subsection{Observations/Comments}
-{\color{red} Inlcude any additional observations or comments.}
+
+\noindent From the experimental results, several trends are revealed:
+
+\begin{itemize}
+    \item Program3 exhibits exponential growth, making it impractical for inputs larger than $n=50$.
+    \item Programs 4A and 4B scale quadratically and remain feasible for moderate input sizes, with 4B slightly faster on average than 4A.
+    \item Program5 produces linear scaling, efficiently handling very large inputs up to $n=50{,}000$ with low runtimes.
+    \item Algorithm1 produces outputs of comparable quality to Program5, with small relative differences across all tested input sizes, confirming its effectiveness.
+    \item The overlay plots clearly illustrate the different scaling behaviors, justifying the choice of different input ranges for each algorithm.
+\end{itemize}
+
+\noindent Overall, the experiments highlight the trade-offs between runtime efficiency and output quality, and show that linear and quadratic algorithms are suitable for large-scale data, while exponential algorithms are limited to small inputs.
+
 
 \section{Conclusion}
-{\color{red} Summarize your learning experience in Milestone 1. Reflect on design, analysis, experiments, and challenges.}
+
+This component of the project allowed us to collaborate in developing and analyzing dynamic programming and efficient algorithms for selecting vaults under spacing constraints. 
+
+\vspace{1em}
+
+Program 3 was the most challenging to implement due to its exponential time complexity, O($2^n$). While the algorithm itself was straightforward, testing it for larger inputs quickly became impractical. This exercise helped us understand the limitations of naive recursive solutions and reinforced the importance of considering time complexity when designing algorithms. Through careful testing and small input sizes, we were able to verify correctness and gain insight into the exponential growth of the runtime.
+
+\vspace{1em}
+
+Programs 4A and 4B were implemented using dynamic programming with quadratic time complexity, O($n^2$). Implementing these algorithms required careful attention to the recurrence relations and the k-spacing constraints. Comparing the two variants, we observed slight differences in runtime efficiency. Proving correctness and feasibility involved structured induction and backtracking proofs, reinforcing our understanding of formal algorithmic reasoning.
+
+\vspace{1em}
+
+Program 5 was the most efficient, with linear time complexity, O($n$). Developing this algorithm demonstrated how dynamic programming can be optimized to achieve scalable performance on very large datasets. Testing on inputs up to $n = 50{,}000$ confirmed the algorithm’s efficiency and correctness, and the overlay plots illustrated the dramatic improvement over less efficient algorithms.
+
+\vspace{1em}
+
+Overall, this portion of the project helped us practice designing, implementing, and proving dynamic programming algorithms with varying time complexities. It strengthened our ability to analyze runtime and output quality, and improved our collaborative skills in developing efficient, correct, and feasible algorithms for a range of input sizes.
 
 \end{document}
